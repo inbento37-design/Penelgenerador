@@ -1,7 +1,9 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Generador de Keys</title>
+
   <style>
     body {
       margin: 0;
@@ -13,69 +15,79 @@
       align-items: center;
       height: 100vh;
       gap: 20px;
-    }.box {
-  background: #111827;
-  padding: 20px;
-  border-radius: 12px;
-  width: 320px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
-  text-align: center;
-}
+    }
 
-input, select, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-}
+    .box {
+      background: #111827;
+      padding: 20px;
+      border-radius: 12px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
 
-button {
-  background: #3b82f6;
-  color: white;
-  cursor: pointer;
-}
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
 
-button:hover {
-  background: #2563eb;
-}
+    button {
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+    }
 
-.hidden {
-  display: none;
-}
+    button:hover {
+      background: #2563eb;
+    }
 
-.key {
-  margin-top: 15px;
-  background: #1f2937;
-  padding: 10px;
-  border-radius: 8px;
-  word-break: break-all;
-}
+    .hidden {
+      display: none;
+    }
 
-.side {
-  width: 220px;
-  background: #111827;
-  padding: 15px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
-}
+    .key {
+      margin-top: 15px;
+      background: #1f2937;
+      padding: 10px;
+      border-radius: 8px;
+      word-break: break-all;
+    }
 
-.timer {
-  font-size: 18px;
-  margin-top: 10px;
-  color: #22c55e;
-}
+    .side {
+      width: 220px;
+      background: #111827;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+    }
 
+    .timer {
+      margin-top: 10px;
+      color: #22c55e;
+      font-size: 18px;
+    }
   </style>
 </head>
-<body><div class="box" id="loginBox">
+
+<body>
+
+<!-- LOGIN -->
+<div class="box" id="loginBox">
   <h2>Acceso Admin</h2>
-  <input type="password" id="pass" placeholder="Contraseña admin">
+  <input type="password" id="pass" placeholder="Contraseña">
   <button onclick="login()">Entrar</button>
-</div><div class="box hidden" id="panel">
-  <h2>Generador de Keys</h2>  <select id="days">
+</div>
+
+<!-- PANEL -->
+<div class="box hidden" id="panel">
+  <h2>Generador de Keys</h2>
+
+  <!-- ✔ AQUÍ ESTÁ CORREGIDO -->
+  <select id="days">
     <option value="1">1 Día</option>
     <option value="2">2 Días</option>
     <option value="3">3 Días</option>
@@ -86,16 +98,24 @@ button:hover {
     <option value="90">90 Días</option>
     <option value="180">180 Días</option>
     <option value="365">1 Año</option>
-  </select><button onclick="generateKey()">Generar Key</button>
+  </select>
+
+  <button onclick="generateKey()">Generar Key</button>
 
   <div class="key" id="result">Aquí aparecerá la key</div>
-</div><div class="side hidden" id="sidePanel">
+</div>
+
+<!-- TIMER -->
+<div class="side hidden" id="sidePanel">
   <h3>Tiempo restante</h3>
   <div class="timer" id="timer">--</div>
-</div><script>
+</div>
+
+<script>
 const ADMIN_PASS = "123456";
-let expirationTime = null;
-let interval = null;
+
+let expiration = 0;
+let interval;
 
 function login() {
   let p = document.getElementById("pass").value;
@@ -112,9 +132,11 @@ function login() {
 function randomPart() {
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let out = "";
+
   for (let i = 0; i < 4; i++) {
     out += chars[Math.floor(Math.random() * chars.length)];
   }
+
   return out;
 }
 
@@ -123,7 +145,7 @@ function generateKey() {
 
   let key = randomPart() + "-" + randomPart() + "-" + randomPart();
 
-  expirationTime = Date.now() + (days * 24 * 60 * 60 * 1000);
+  expiration = Date.now() + (days * 24 * 60 * 60 * 1000);
 
   document.getElementById("result").innerHTML =
     "<b>KEY:</b> " + key + "<br><b>Días:</b> " + days;
@@ -132,11 +154,10 @@ function generateKey() {
 }
 
 function startTimer() {
-  if (interval) clearInterval(interval);
+  clearInterval(interval);
 
   interval = setInterval(() => {
-    let now = Date.now();
-    let diff = expirationTime - now;
+    let diff = expiration - Date.now();
 
     if (diff <= 0) {
       document.getElementById("timer").innerText = "EXPIRADA";
@@ -144,13 +165,16 @@ function startTimer() {
       return;
     }
 
-    let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    let minutes = Math.floor((diff / (1000 * 60)) % 60);
+    let d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    let h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    let m = Math.floor((diff / (1000 * 60)) % 60);
 
     document.getElementById("timer").innerText =
-      days + "d " + hours + "h " + minutes + "m";
+      d + "d " + h + "h " + m + "m";
+
   }, 1000);
 }
-</script></body>
+</script>
+
+</body>
 </html>
