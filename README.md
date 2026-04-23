@@ -12,6 +12,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      gap: 20px;
     }.box {
   background: #111827;
   padding: 20px;
@@ -52,6 +53,21 @@ button:hover {
   word-break: break-all;
 }
 
+.side {
+  width: 220px;
+  background: #111827;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.timer {
+  font-size: 18px;
+  margin-top: 10px;
+  color: #22c55e;
+}
+
   </style>
 </head>
 <body><div class="box" id="loginBox">
@@ -64,11 +80,22 @@ button:hover {
     <option value="2">2 Días</option>
     <option value="3">3 Días</option>
     <option value="5">5 Días</option>
+    <option value="7">7 Días</option>
+    <option value="15">15 Días</option>
+    <option value="30">30 Días</option>
+    <option value="90">90 Días</option>
+    <option value="180">180 Días</option>
+    <option value="365">1 Año</option>
   </select><button onclick="generateKey()">Generar Key</button>
 
   <div class="key" id="result">Aquí aparecerá la key</div>
+</div><div class="side hidden" id="sidePanel">
+  <h3>Tiempo restante</h3>
+  <div class="timer" id="timer">--</div>
 </div><script>
-const ADMIN_PASS = "123456"; // cambia esto
+const ADMIN_PASS = "123456";
+let expirationTime = null;
+let interval = null;
 
 function login() {
   let p = document.getElementById("pass").value;
@@ -76,6 +103,7 @@ function login() {
   if (p === ADMIN_PASS) {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("panel").classList.remove("hidden");
+    document.getElementById("sidePanel").classList.remove("hidden");
   } else {
     alert("Contraseña incorrecta");
   }
@@ -91,14 +119,38 @@ function randomPart() {
 }
 
 function generateKey() {
-  let days = document.getElementById("days").value;
+  let days = parseInt(document.getElementById("days").value);
 
   let key = randomPart() + "-" + randomPart() + "-" + randomPart();
+
+  expirationTime = Date.now() + (days * 24 * 60 * 60 * 1000);
 
   document.getElementById("result").innerHTML =
     "<b>KEY:</b> " + key + "<br><b>Días:</b> " + days;
 
-  console.log("Key generada:", key, days);
+  startTimer();
+}
+
+function startTimer() {
+  if (interval) clearInterval(interval);
+
+  interval = setInterval(() => {
+    let now = Date.now();
+    let diff = expirationTime - now;
+
+    if (diff <= 0) {
+      document.getElementById("timer").innerText = "EXPIRADA";
+      clearInterval(interval);
+      return;
+    }
+
+    let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    let minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+    document.getElementById("timer").innerText =
+      days + "d " + hours + "h " + minutes + "m";
+  }, 1000);
 }
 </script></body>
 </html>
